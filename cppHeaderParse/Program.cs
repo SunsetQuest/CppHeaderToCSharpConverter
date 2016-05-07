@@ -54,7 +54,7 @@ namespace cppHeaderParse
            )\s*
            (?<name>[a-zA-Z_][a-zA-Z0-9_]*)\s*
            (:\s*\d+\s*)? # match bit fields
-           (?<post>.*?;[\t\ ]*(//[^\r\n]*?(?=\r\n))?)";
+           (?<post>.*?;[\t\ ]*(//[^\r?\n]*?(?=\r?\n))?)";
 
         /// <summary>
         /// This is the main parser RegEx.  It is what is used to decode the file.  For debugging, take out
@@ -62,46 +62,46 @@ namespace cppHeaderParse
         /// </summary>
         public const string mainParser = @"
             ( #### decode c++ version of enum;  EXAMPLE:enum myEnum{ red, green, blue };
-              (?<=\r\n|;|\}) \s*
+              (?<=\r?\n|;|\}) \s*
               enum\s+?(class|\s+?struct\s+?)?(?<enum_name>[a-zA-Z_][a-zA-Z0-9_]*)\s*?
                \{\s*?
                     (?<enum_rows>[^;}]*?)
-               \}\s*?;\s*?([\ \t]*(?<comments>//.*?)\r\n)?
+               \}\s*?;\s*?([\ \t]*(?<comments>//.*?)(?:\r?\n))?
             )|( #### decode c version of enum;  EXAMPLE:typedef enum { red, green, blue } myEnum;
-              (?<=\r\n|;|\}) \s* 
+              (?<=\r?\n|;|\}) \s* 
               \s*typedef\senum\s+?\s*
                \{\s*
                     (?<enum_rows>[^;}]*?)
-               \}\s*(?<enum_name>[a-zA-Z_][a-zA-Z0-9_]*)\s*?;\s*?([\ \t]*(?<comments>//.*?)\r\n)?
+               \}\s*(?<enum_name>[a-zA-Z_][a-zA-Z0-9_]*)\s*?;\s*?([\ \t]*(?<comments>//.*?)(?:\r?\n))?
             )|( #### Match defines without text EXAMPLE:#DEFINE test //test
-              (?<=\r\n) [\ \t]*
+              (?<=\r?\n) [\ \t]*
               \#DEFINE[\ \t]*
               (?<def_name>[a-zA-Z_][a-zA-Z0-9_]*)
               (\([\ \t]*
                 (?<def_params>([a-zA-Z_][a-zA-Z0-9_]*)(\[\ \t]*,[\ \t]*(?!\)))?)+ 
               [\ \t]*\))?
-              [\ \t]*(?<def_value>[^\r\n]*?)
-              [\ \t]*(?<comments>//[^\r\n]*?)?\r\n # define ends on line
+              [\ \t]*(?<def_value>[^\r?\n]*?)
+              [\ \t]*(?<comments>//[^\r?\n]*?)?(?:\r?\n) # define ends on line
             )|( #### Decode #DEFINE with value   EXAMPLE:#DEFINE MyDefine bla a,b //test
-              (?<=\r\n) [\ \t]*
+              (?<=\r?\n) [\ \t]*
               \#DEFINE[\ \t]*
               (?<def_name>[a-zA-Z_][a-zA-Z0-9_]+)
-               [\ \t]*(?<comments>//.*?)?\r\n  # define ends on line
+               [\ \t]*(?<comments>//.*?)?(?:\r?\n)  # define ends on line
             )|( #### Decode c/c++ Preprocessor directives   EXAMPLE:#ifndef __MY_INCLUDED__
-              (?<=\r\n)[\ \t]*(?<def_other>\#(IFDEF|IFNDEF|IF|ELSE|ELIF\s|ENDIF|UNDEF|ERROR|
-               LINE|PRAGMA\s+REGION|PRAGMA\s+ENDREGION))(?<def_stuff>.*?)\r\n
+              (?<=\r?\n)[\ \t]*(?<def_other>\#(IFDEF|IFNDEF|IF|ELSE|ELIF\s|ENDIF|UNDEF|ERROR|
+               LINE|PRAGMA\s+REGION|PRAGMA\s+ENDREGION))(?<def_stuff>.*?)(?:\r?\n)
             )|( #### Decode structs  EXAMPLE: struct Cat {int a; int b;}
-              (?<=\r\n|;|\}) \s*
+              (?<=\r?\n|;|\}) \s*
               struct\s+(?<struct_name>[a-zA-Z_][a-zA-Z0-9_]*)
                \s*\{\s*
                 (?<struct_rows>[^\}]*?)
                \s*\}\s*
-              (?<struct_imp>[a-zA-Z_][a-zA-Z0-9_]*)?\s*;([\ \t]*(?<comments>//.*?)\r\n)?
+              (?<struct_imp>[a-zA-Z_][a-zA-Z0-9_]*)?\s*;([\ \t]*(?<comments>//.*?)(?:\r?\n))?
             )|( #### Match: const constants  EXAMPLE:const int myNum = 5; static char *SDK_NAME = ""fast"";
-              (?<=\r\n|;|\}) " + VarWithAssignment + @"
+              (?<=\r?\n|;|\}) " + VarWithAssignment + @"
             )|( ####  Match: Commands EXAMPLE:\\C2CS_Set_Namespace: mynamespace 
               //[\ \t]*(?<cmd>(C2CS_Set_Namespace|C2CS_Set_ClassName|C2CS_Class_Write|
-              C2CS_NS_Write|C2CS_TOP_Write))[\ \t]?(?<cmd_val>.*?)\r\n
+              C2CS_NS_Write|C2CS_TOP_Write))[\ \t]?(?<cmd_val>.*?)(?:\r?\n)
             )";
    
         /// <summary>
@@ -128,7 +128,7 @@ namespace cppHeaderParse
         {
             { "bool","bool"},
             { "longlong","long"},
-            { "char*","String"},
+            { "char*","string"},
             { "wchar_t","Char"},
             { "wchar_t*","string"},
             { "unsignedchar","byte"},
@@ -136,12 +136,12 @@ namespace cppHeaderParse
             { "unsignedint","uint"},
             { "unsignedlong","uint"},
             { "unsignedlonglong","ulong"},
-            { "signedchar","SByte"},
+            { "signedchar","sbyte"},
             { "signedshort","short"},
             { "signedint","int"},
             { "signedlong","uint"},
             { "signedlonglong","long"},
-            { "char","SByte"},
+            { "char","sbyte"},
             { "short","short"},
             { "shortint","short"},
             { "int","int"},
@@ -154,7 +154,6 @@ namespace cppHeaderParse
        
         static void Main(string[] args)
         {
-            
             // This is for timing - it can be commented out if desired
             System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
             timer.Start();
@@ -188,7 +187,7 @@ namespace cppHeaderParse
             }
 
             // Let’s remove all the /*...*/ style comments
-            text = Regex.Replace(text, @"/\*[^*]*\*+(?:[^*/][^*]*\*+)*/", String.Empty);
+            text = Regex.Replace(text, @"/\*[^*]*\*+(?:[^*/][^*]*\*+)*/", string.Empty);
 
             // Let’s create the three output containers, these will be merged at the end
             StringBuilder top_area = new StringBuilder("// Generated using CppHeader2CS\r\n");
@@ -290,7 +289,7 @@ namespace cppHeaderParse
                         sb.AppendLine("    public enum " + name);
                         sb.AppendLine("    {");
                         MatchCollection items = Regex.Matches(rows,
-                            @"\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:\s*=\s*([^\,\r\n\{\}\;]*?))?\s*,");
+                            @"\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:\s*=\s*([^\,(?:\r?\n)\{\}\;]*?))?\s*,");
                         foreach (Match r in items)
                         {
                             bool hasValue = r.Groups[2].Success;
@@ -351,7 +350,7 @@ namespace cppHeaderParse
                     // open, VS has a pop-up that prompts the user if they want to replace the file. This
                     // can be annoying. To fix this we only replace the file if something changed. One
                     // other advantage is it leaves the "date modified" when there are no changes.
-                    if (File.Exists(args[1]) && String.Compare(File.ReadAllText(args[1]), final.ToString()) == 0)
+                    if (File.Exists(args[1]) && string.Compare(File.ReadAllText(args[1]), final.ToString()) == 0)
                         Console.WriteLine("Info: Bypassing CppHeader2CS conversion because no changes were detected.");
                     else
                         File.WriteAllText(args[1], final.ToString());

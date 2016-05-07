@@ -106,9 +106,9 @@ namespace mynamespace
     {
         // This comment will appear in the class section.
 #if ! __MYTEST_INCLUDED__
-        public const String SDK_name= "fluidsD3D9";	// re-labeled into a string
-        public const String SDK_name2= "fluidsD3D9";	// re-labeled into a string
-        public const SByte myChar= -100;				// char is re-labeled to sbyte
+        public const string SDK_name= "fluidsD3D9";	// re-labeled into a string
+        public const string SDK_name2= "fluidsD3D9";	// re-labeled into a string
+        public const sbyte myChar= -100;				// char is re-labeled to sbyte
         public const short myShort= -100;		// short int is re-labeled to Int16
         public const int NUM_CALCS=6; 
 #endif // __MYTEST_INCLUDED__
@@ -117,6 +117,8 @@ namespace mynamespace
 #if (TEST && TEST) //TEST COMMENT
 #else
 #endif // TEST && TEST
+        public const double LineFeedOnlyTest = -3.2; 
+        public const string LineFeedOnlyTest2= "fluidsD3D9";
 #if TEST
 #endif // ifdef TEST
 #region start
@@ -150,10 +152,10 @@ namespace mynamespace
         public const double exprDouble4c = 2.2 + 2.2d; 
         public const string exprDouble4 = "2.2 + 2.2d + 0xFAb"; 
         public const bool exprBool5 = MYBOOL2 || true; 
+        public const string exprBool_Mixed0 = "(my_float1 == my_float1) || true"; // auto-detect for mixed boolean and int/floats is not supported
+        public const bool exprBool_Mixed1 = (my_float1 == my_float1) || true; // C2CS_TYPE:bool
         
         // Any #Defines that cannot be converted into an int, float, or bool will be a string 
         public const string my_string = "MyString"; 
-        public const string SHOULD_BE_SKIPPED52_exprBool = "(my_float1 == my_float1) || true"; // mixed boolean and int/floats not supported
-        public const SByte SHOULD_BE_SKIPPED77= -100;	// skipped - private is not brought over
     }
 }

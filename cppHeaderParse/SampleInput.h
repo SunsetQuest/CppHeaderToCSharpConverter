@@ -118,6 +118,12 @@ enum EnumTest4
    _Test,
 };
 
+// LineFeed only test (for Unix/Mac X)
+
+#define LineFeedOnlyTest -3.2
+static char *LineFeedOnlyTest2 = "fluidsD3D9";
+
+
 // The source file should be error free, CppHeader2CS will sometimes skip incorrect code...
 enum SHOULD_BE_SKIPPED41{ red, green, blue } e;  // skipped - invalid enum
 enum { red, green, blue } SHOULD_BE_SKIPPED42;  // skipped - invalid enum
@@ -173,6 +179,8 @@ enum SHOULD_BE_SKIPPED44{ red;green;blue };  // skipped - invalid enum
 #define exprDouble4c 2.2 + 2.2d  
 #define exprDouble4 2.2 + 2.2d + 0xFAb   
 #define exprBool5 MYBOOL2 || true	
+#define exprBool_Mixed0 (my_float1 == my_float1) || true  // auto-detect for mixed boolean and int/floats is not supported
+#define exprBool_Mixed1 (my_float1 == my_float1) || true  // C2CS_TYPE:bool
 
 // C2CS_Class_Write
 // C2CS_Class_Write // Any #Defines that cannot be converted into an int, float, or bool will be a string 
@@ -181,7 +189,6 @@ enum SHOULD_BE_SKIPPED44{ red;green;blue };  // skipped - invalid enum
 
 // Some items that cannot be converted or are not implemented. All of the following will be bypassed...
 const MyType SHOULD_BE_SKIPPED51 = 5; // This will get skipped because UnknownType is not recognized
-#define SHOULD_BE_SKIPPED52_exprBool (my_float1 == my_float1) || true  // mixed boolean and int/floats not supported
 #define SHOULD_BE_SKIPPED52 143		// This line will be skipped because C2CS_SKIP is in the comments. It can be anywhere.
 /*const int SHOULD_BE_SKIPPED53 = 5;// skipped - Anything(including commands) in this style of comment will always be skipped */
 typedef int SHOULD_BE_SKIPPED54;	// skipped - typedefs are not supported in c#
@@ -189,7 +196,6 @@ typedef int SHOULD_BE_SKIPPED54;	// skipped - typedefs are not supported in c#
 #include <SHOULD_BE_SKIPPED55>		// skipped - included dependencies
 #include "SHOULD_BE_SKIPPED56.h"	// skipped - included dependencies
 class SHOULD_BE_SKIPPED57;			// skipped - forward declared dependencies
-private static char SHOULD_BE_SKIPPED77 = -100;	// skipped - private is not brought over
   struct StructWithBitFields {
 	private int test1 : 3;
 	private int test2 : 4;
