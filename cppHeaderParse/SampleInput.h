@@ -25,8 +25,6 @@
 // C2CS_Class_Write // This comment will appear in the class section.
 
 
-
-
 // Lets begin with some examples....
 // #ifndef will be converted to #if ! and will be duplicated in both the namespace area and the class area.
 #ifndef __MYTEST_INCLUDED__
@@ -45,7 +43,7 @@ public:						   // ignored - all output is public
 };
 
 // Global variables and constants get added to the class area...
-static char *SDK_name = "fluidsD3D9";	// re-labeled into a string
+static char *SDK_name = "fluidsD3D92";	// re-labeled into a string
 static char* SDK_name2 = "fluidsD3D9";	// re-labeled into a string
 protected static char myChar = -100;				// char is re-labeled to sbyte
 static short int myShort = -100;		// short int is re-labeled to Int16
@@ -140,17 +138,27 @@ enum SHOULD_BE_SKIPPED44{ red;green;blue };  // skipped - invalid enum
 
 #endif // ifdef TEST
 // C2CS_NS_Write
+
+
+// C2CS_NS_Write // The 'defined' style of pre-defines are supported. Since the logic is the simular, c++ logic will pass through.
+#if !defined(TEST1 && TEST2 || TEST3) 
+#endif 
+// C2CS_NS_Write
+
+
 #pragma region start
 
 #pragma endregion
 // C2CS_NS_Write
 
+
 // Adjustments
 #define DEV_MODE
 #define My_Bool     true  //public const bool My_Bool = true 
 #define My_Bool2	false //public const bool My_Bool = false
+// C2CS_NS_Write
 
-// C2CS_Class_Write
+
 // C2CS_Class_Write // Tabs/spaces are okay.  Also beginning and ending parentheses are okay. 
 #define my_int1 131072      //this one has spaces
 #define my_int2	131072	//this one has a tabs
@@ -159,8 +167,6 @@ enum SHOULD_BE_SKIPPED44{ red;green;blue };  // skipped - invalid enum
 #define MYBOOL0	true
 #define MYBOOL1	false
 #define MYBOOL2	(true) // test
-
-// C2CS_Class_Write
 #define my_double1 3.0
 #define my_double2 -3.2   
 #define my_double3 -3.2d   
@@ -169,7 +175,6 @@ enum SHOULD_BE_SKIPPED44{ red;green;blue };  // skipped - invalid enum
 #define my_float1 3.3f     
 #define my_float2 3.3F     
 #define my_float3 3f     
-
 #define exprInt0 1 + 2				// C2CS_TYPE:byte  <-- here we are telling CppHeader2CS to force a "byte" type.
 #define exprDouble1 my_double1 + 2     
 #define exprFloat2 my_float1 + 2     
@@ -181,11 +186,9 @@ enum SHOULD_BE_SKIPPED44{ red;green;blue };  // skipped - invalid enum
 #define exprBool5 MYBOOL2 || true	
 #define exprBool_Mixed0 (my_float1 == my_float1) || true  // auto-detect for mixed boolean and int/floats is not supported
 #define exprBool_Mixed1 (my_float1 == my_float1) || true  // C2CS_TYPE:bool
-
-// C2CS_Class_Write
 // C2CS_Class_Write // Any #Defines that cannot be converted into an int, float, or bool will be a string 
 #define my_string MyString 
-
+// C2CS_Class_Write
 
 // Some items that cannot be converted or are not implemented. All of the following will be bypassed...
 const MyType SHOULD_BE_SKIPPED51 = 5; // This will get skipped because UnknownType is not recognized

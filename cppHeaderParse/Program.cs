@@ -12,12 +12,12 @@
    Project link:  http://www.codeproject.com/Articles/800111/Passing-C-Cplusplus-Constants-e
    
    Visual studio usage: 
-    1) Copy the CppHeader2CS.exe file to some location
-    2) Open the Project Properties for the C# project and then navigate to the Build Events Section.
+    1) Copy the CppHeader2CS.exe file to some location on your local drive.
+    2) Open the Project Properties for the C# project and then navigate to the 'Build Events' section.
     3) In the Pre-build event command line enter something like the following: 
        C:\[tool location]\CppHeader2CS.exe "$(ProjectDir)MyInput.h" "$(ProjectDir)myCppSharedItems.cs"
-       Depending on your needs you will need to adjust the file names and locations above. Visual Studio 
-       helps with this using the macros button.
+       Depending on the needs, adjust the file names and locations above. Visual Studio helps with 
+       this using the macros path locations.
 */
 
 using System;
@@ -88,7 +88,7 @@ namespace cppHeaderParse
               (?<def_name>[a-zA-Z_][a-zA-Z0-9_]+)
                [\ \t]*(?<comments>//.*?)?(?:\r?\n)  # define ends on line
             )|( #### Decode c/c++ Preprocessor directives   EXAMPLE:#ifndef __MY_INCLUDED__
-              (?<=\r?\n)[\ \t]*(?<def_other>\#(IFDEF|IFNDEF|IF|ELSE|ELIF\s|ENDIF|UNDEF|ERROR|
+              (?<=\r?\n)[\ \t]*(?<def_other>\#(if\s+!?defined|IFDEF|IFNDEF|IF|ELSE|ELIF\s|ENDIF|UNDEF|ERROR|
                LINE|PRAGMA\s+REGION|PRAGMA\s+ENDREGION))(?<def_stuff>.*?)(?:\r?\n)
             )|( #### Decode structs  EXAMPLE: struct Cat {int a; int b;}
               (?<=\r?\n|;|\}) \s*
@@ -190,10 +190,10 @@ namespace cppHeaderParse
             text = Regex.Replace(text, @"/\*[^*]*\*+(?:[^*/][^*]*\*+)*/", string.Empty);
 
             // Let’s create the three output containers, these will be merged at the end
-            StringBuilder top_area = new StringBuilder("// Generated using CppHeader2CS\r\n");
-            StringBuilder usings_area = new StringBuilder("\r\nusing System;\r\nusing System.Runtime.InteropServices;\r\n");
-            StringBuilder ns_area = new StringBuilder(text.Length);
-            StringBuilder class_area = new StringBuilder(text.Length);     
+            var top_area = new StringBuilder("// Generated using CppHeader2CS\r\n");
+            var usings_area = new StringBuilder("\r\nusing System;\r\nusing System.Runtime.InteropServices;\r\n");
+            var ns_area = new StringBuilder(text.Length);
+            var class_area = new StringBuilder(text.Length);     
 
             // Let’s now process the input file
             try
@@ -227,9 +227,11 @@ namespace cppHeaderParse
                     // Match other types of predefinitions, Example: #if (myDef && myDef)
                     else if (match.Groups["def_other"].Success)
                     {
-                        string defType = match.Groups["def_other"].Value.ToLower();
+                        string defType = RemoveWhitespace(match.Groups["def_other"].Value).ToLower();
                         if (defType == "#ifdef") defType = "#if";
                         else if (defType == "#ifndef") defType = "#if !";
+                        else if (defType == "#ifdefined") defType = "#if";
+                        else if (defType == "#if!defined") defType = "#if !";
                         else if (defType.EndsWith("endregion")) defType = "#endregion";
                         else if (defType.EndsWith("region")) defType = "#region";
 
@@ -358,7 +360,7 @@ namespace cppHeaderParse
                 else
                     Console.Write(final);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 Console.Write("Error: Error when processing source file.  Details:" + ex.ToString());
             }
@@ -375,7 +377,7 @@ namespace cppHeaderParse
         /// <returns>The c/c++ variable to c# format.</returns>
         private static string VarWithAssignmentConverter(Match match)
         {
-            string type = Regex.Replace(match.Groups["type"].ToString(), @"\s", ""); //removes whitespace
+            string type = RemoveWhitespace(match.Groups["type"].ToString()); //removes whitespace
             string name = match.Groups["name"].ToString();
             string post = match.Groups["post"].ToString();
             string csVersion = "";
@@ -415,7 +417,7 @@ namespace cppHeaderParse
                 AddVarName(name, ConstDesc.canBeFloat);
             }
             //////  Let’s see if it can be parsed to simple int  //////
-            else if (Int32.TryParse(val, NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, null, 
+            else if (int.TryParse(val, NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, null, 
                 out outInt))
             {
                 class_area.AppendLine("        public const int " + name + " = " + outInt + "; " + comments);
@@ -456,7 +458,7 @@ namespace cppHeaderParse
                 MatchCollection items;
                 bool isIntExpression = false, isBoolExpression = false;
 
-                //can we recognize the expression as a bool or Int
+                // Check to see if a bool or int can be recognized.
                 items = Regex.Matches(val, @"
 ^(?:
 # Match as many as 'Val opp' as possible
@@ -589,6 +591,9 @@ $", RegexOptions.IgnorePatternWhitespace);
                 consts.Add(name, vall);
         }
 
+        /// <summary>
+        /// When the user runs the console executable file with no options they will get the following help message.
+        /// </summary>
         private static void DisplayHelp()
         {
             Console.WriteLine("");
@@ -617,6 +622,36 @@ $", RegexOptions.IgnorePatternWhitespace);
             Console.WriteLine("// C2CS_Set_ClassName MyClass - C2CS_Set_ClassName sets the class name to use. This is optional and if unspecified defaults to Constants.");
             Console.WriteLine("// C2CS_TYPE MyType - C2CS_TYPE is used in the comments after a #define to specify what type to use.  This is required if the automatic detection does not work as expected or the programmer wants to force a type. Example: #Default mySum (2+1) //C2CS_TYPE int;");
             Console.WriteLine("// C2CS_SKIP - Adding C2CS_SKIP in any comment forces CppHeader2CS to ignore the current line.");
+        }
+
+        /// <summary>
+        /// A fast method that removes any whitespace in a string.
+        /// source: Felipe R. Machado 2015 http://www.codeproject.com/Articles/1014073/Fastest-method-to-remove-all-whitespace-from-Strin
+        /// </summary>
+        public static string RemoveWhitespace(string str)
+        {
+            var len = str.Length;
+            var src = str.ToCharArray();
+            int dstIdx = 0;
+            for (int i = 0; i < len; i++)
+            {
+                var ch = src[i];
+                switch (ch)
+                {
+                    case '\u0020':  case '\u00A0':  case '\u1680':  case '\u2000':
+                    case '\u2001':  case '\u2002':  case '\u2003':  case '\u2004':
+                    case '\u2005':  case '\u2006':  case '\u2007':  case '\u2008':
+                    case '\u2009':  case '\u200A':  case '\u202F':  case '\u205F':
+                    case '\u3000':  case '\u2028':  case '\u2029':  case '\u0009':
+                    case '\u000A':  case '\u000B':  case '\u000C':  case '\u000D':
+                    case '\u0085':
+                        continue;
+                    default:
+                        src[dstIdx++] = ch;
+                        break;
+                }
+            }
+            return new string(src, 0, dstIdx);
         }
     }
 }

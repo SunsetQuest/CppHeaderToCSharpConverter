@@ -77,8 +77,13 @@ namespace mynamespace
 #if TEST
 #endif // ifdef TEST
 
+// The 'defined' style of pre-defines are supported. Since the logic is the simular, c++ logic will pass through.
+#if !(TEST1 && TEST2 || TEST3) 
+#endif 
+
 #region start
 #endregion
+
 
     public struct StructWithBitFields
     {
@@ -106,7 +111,7 @@ namespace mynamespace
     {
         // This comment will appear in the class section.
 #if ! __MYTEST_INCLUDED__
-        public const string SDK_name= "fluidsD3D9";	// re-labeled into a string
+        public const string SDK_name= "fluidsD3D92";	// re-labeled into a string
         public const string SDK_name2= "fluidsD3D9";	// re-labeled into a string
         public const sbyte myChar= -100;				// char is re-labeled to sbyte
         public const short myShort= -100;		// short int is re-labeled to Int16
@@ -121,11 +126,12 @@ namespace mynamespace
         public const string LineFeedOnlyTest2= "fluidsD3D9";
 #if TEST
 #endif // ifdef TEST
+#if !(TEST1 && TEST2 || TEST3) 
+#endif 
 #region start
 #endregion
         public const bool My_Bool = true; //public const bool My_Bool = true 
         public const bool My_Bool2 = false; //public const bool My_Bool = false
-        
         // Tabs/spaces are okay.  Also beginning and ending parentheses are okay. 
         public const int my_int1 = 131072; //this one has spaces
         public const int my_int2 = 131072; //this one has a tabs
@@ -134,7 +140,6 @@ namespace mynamespace
         public const bool MYBOOL0 = true; 
         public const bool MYBOOL1 = false; 
         public const bool MYBOOL2 = true; // test
-        
         public const double my_double1 = 3.0; 
         public const double my_double2 = -3.2; 
         public const double my_double3 = -3.2d; 
@@ -154,8 +159,8 @@ namespace mynamespace
         public const bool exprBool5 = MYBOOL2 || true; 
         public const string exprBool_Mixed0 = "(my_float1 == my_float1) || true"; // auto-detect for mixed boolean and int/floats is not supported
         public const bool exprBool_Mixed1 = (my_float1 == my_float1) || true; // C2CS_TYPE:bool
-        
         // Any #Defines that cannot be converted into an int, float, or bool will be a string 
         public const string my_string = "MyString"; 
+        
     }
 }
