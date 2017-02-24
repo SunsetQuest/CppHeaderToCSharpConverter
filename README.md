@@ -28,3 +28,7 @@ Description: This command line tool extracts C/C++ constants, predefinitions, st
    - Added support for the 'if defined(...)' style of predefs.
    - Performance: added faster method to remove whitespace.
    - Other: General code/comment cleanups (minor)
+ - 2/23/2017
+   - Updated 'enum' code
+   - removed trailing space on some lines
+   - minor performance tweaks (used SortedDictionary instead of Dictionary for typeConversions)
