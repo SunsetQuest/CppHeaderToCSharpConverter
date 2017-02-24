@@ -1,5 +1,5 @@
 ﻿//C2CS_TOP_Write // This is both a demo and testing file.  This file represents a c/c++ header file that we want to share basic items with a C# project.  These can be constants, structures, predefinitions, and enums.
-  
+
 /* Commands and usage               Description
 ===========================================================
 "// C2CS_TOP_Write text to write"	C2CS_TOP_Write writes text after above the namespace. This can be useful whenever their is a need to print at the top of the output file. Example:  //C2CS_TOP_Write using System.IO;
@@ -101,6 +101,24 @@ typedef enum
    test1
 } test1;
 
+typedef enum
+{
+	T_BSFEE_0 = 0, // note notes note
+	T_DFG, // note notes note
+	T_GdrefRdgergfg, // note notes note
+	T_TdfgrgrBdfg, // note notes note
+
+				   // NOTE: notes no not notesnot note not notesn no no note no *not* notesn no not notes notes, note not no notes not notes, notesnote
+				   T_WOV_BPWJKV, // note not notesno
+				   T_Lwfs = T_WOV_BPWJKV, // fan data
+				   T_Msvfwwv, // notes note note notes notes not.
+				   T_Sllqsi6, // note notes note (note note , note)
+				   T_Ldfgfe4, // note notes note (note)
+				   T_Dropd0,
+				   T_HID_WQO = T_Dropd0, // note not notesno
+
+				   T_WPVOE_EKN = 0x11 // no not notesn
+} HfgWgi_z;
 
 enum EnumTest2 {
 	test1 = 33,
@@ -110,23 +128,21 @@ enum EnumTest2 {
 // single line test
 enum EnumTest3{ red, green, blue };
 
-
+// Test trailing comma - valid in c/c++
 enum EnumTest4
  {
    _Test,
 };
 
+// The source file should be error free, CppHeader2CS will sometimes skip incorrect code...
+enum SHOULD_BE_SKIPPED41 { red, green, blue } e;  // skipped - invalid enum
+enum { red, green, blue } SHOULD_BE_SKIPPED42;  // skipped - invalid enum
+enum SHOULD_BE_SKIPPED44 { red;green;blue };  // skipped - invalid enum
+
 // LineFeed only test (for Unix/Mac X)
 
 #define LineFeedOnlyTest -3.2
 static char *LineFeedOnlyTest2 = "fluidsD3D9";
-
-
-// The source file should be error free, CppHeader2CS will sometimes skip incorrect code...
-enum SHOULD_BE_SKIPPED41{ red, green, blue } e;  // skipped - invalid enum
-enum { red, green, blue } SHOULD_BE_SKIPPED42;  // skipped - invalid enum
-enum SHOULD_BE_SKIPPED44{ red;green;blue };  // skipped - invalid enum
-
 
 // C2CS_NS_Write 
 // C2CS_NS_Write // empty lines below created by using an empty "// C2CS_NS_Write" or // C2CS_NS_Write (blank line)
@@ -140,7 +156,7 @@ enum SHOULD_BE_SKIPPED44{ red;green;blue };  // skipped - invalid enum
 // C2CS_NS_Write
 
 
-// C2CS_NS_Write // The 'defined' style of pre-defines are supported. Since the logic is the simular, c++ logic will pass through.
+// C2CS_NS_Write // The 'defined' style of pre-defines are supported. Since the logic is the similar, c++ logic will pass through.
 #if !defined(TEST1 && TEST2 || TEST3) 
 #endif 
 // C2CS_NS_Write
@@ -222,3 +238,4 @@ class SHOULD_BE_SKIPPED57;			// skipped - forward declared dependencies
 // enum SHOULD_BE_SKIPPED22{ red, green, blue }; // comments
 //struct SHOULD_BE_SKIPPED23 {char a; char b; char c;}; 
 /*struct SHOULD_BE_SKIPPED23 {char a; char b; char c;}; */
+

@@ -1,4 +1,4 @@
-/* CppHeader2CS was created by Ryan White  (Updated: 10/12/2014)
+/* CppHeader2CS was created by Ryan White  (Updated: 2/23/2017)
    
    Purpose: A tool to share simple constants, structs, and a few other items between a C/C++ and a C#
    project at compile time.  Despite it's name its not a full C to C# converter.  It is mostly a tool 
@@ -45,15 +45,15 @@ namespace cppHeaderParse
         
         /// <summary>Matches a variable declaration with an assignment</summary>
         public const string VarWithAssignment = @" 
-           (public\s*?|protected\s*?|private\s*?)?
-           (static\s*?)?
-           (const\s*?)?
+           (public[\ \t\r\n]*?|protected[\ \t\r\n]*?|private[\ \t\r\n]*?)?
+           (static[\ \t\r\n]*?)?
+           (const[\ \t\r\n]*?)?
            (?<type>
-             (((un)?signed)\s*?)? ((char|wchar_t|void)\s*?\*|short\s+int|long\s+(int|long)|int|char|short|long)
+             (((un)?signed)[\ \t\r\n]*?)? ((char|wchar_t|void)[\ \t\r\n]*?\*|short[\ \t\r\n]+int|long[\ \t\r\n]+(int|long)|int|char|short|long)
              |[a-zA-Z_][a-zA-Z0-9_]*
-           )\s*
-           (?<name>[a-zA-Z_][a-zA-Z0-9_]*)\s*
-           (:\s*\d+\s*)? # match bit fields
+           )[\ \t\r\n]*
+           (?<name>[a-zA-Z_][a-zA-Z0-9_]*)[\ \t\r\n]*
+           (:[\ \t\r\n]*\d+[\ \t\r\n]*)? # match bit fields
            (?<post>.*?;[\t\ ]*(//[^\r?\n]*?(?=\r?\n))?)";
 
         /// <summary>
@@ -62,17 +62,17 @@ namespace cppHeaderParse
         /// </summary>
         public const string mainParser = @"
             ( #### decode c++ version of enum;  EXAMPLE:enum myEnum{ red, green, blue };
-              (?<=\r?\n|;|\}) \s*
-              enum\s+?(class|\s+?struct\s+?)?(?<enum_name>[a-zA-Z_][a-zA-Z0-9_]*)\s*?
-               \{\s*?
+              (?<=\r?\n|;|\}) [\ \t\r\n]*
+              enum[\ \t\r\n]+?(class|[\ \t\r\n]+?struct[\ \t\r\n]+?)?(?<enum_name>[a-zA-Z_][a-zA-Z0-9_]*)[\ \t\r\n]*?
+               \{[\ \t\r\n]*
                     (?<enum_rows>[^;}]*?)
-               \}\s*?;\s*?([\ \t]*(?<comments>//.*?)(?:\r?\n))?
+               \}[\ \t\r\n]*?;[\ \t\r\n]*?([\ \t]*(?<comments>//.*?)(?:\r?\n))?
             )|( #### decode c version of enum;  EXAMPLE:typedef enum { red, green, blue } myEnum;
-              (?<=\r?\n|;|\}) \s* 
-              \s*typedef\senum\s+?\s*
-               \{\s*
+              (?<=\r?\n|;|\}) [\ \t\r\n]* 
+              [\ \t\r\n]*typedef[\ \t\r\n]enum[\ \t\r\n]+?[\ \t\r\n]*
+               \{[\ \t\r\n]*
                     (?<enum_rows>[^;}]*?)
-               \}\s*(?<enum_name>[a-zA-Z_][a-zA-Z0-9_]*)\s*?;\s*?([\ \t]*(?<comments>//.*?)(?:\r?\n))?
+               \}[\ \t\r\n]*(?<enum_name>[a-zA-Z_][a-zA-Z0-9_]*)[\ \t\r\n]*?;[\ \t\r\n]*?([\ \t]*(?<comments>//.*?)(?:\r?\n))?
             )|( #### Match defines without text EXAMPLE:#DEFINE test //test
               (?<=\r?\n) [\ \t]*
               \#DEFINE[\ \t]*
@@ -80,23 +80,23 @@ namespace cppHeaderParse
               (\([\ \t]*
                 (?<def_params>([a-zA-Z_][a-zA-Z0-9_]*)(\[\ \t]*,[\ \t]*(?!\)))?)+ 
               [\ \t]*\))?
-              [\ \t]*(?<def_value>[^\r?\n]*?)
-              [\ \t]*(?<comments>//[^\r?\n]*?)?(?:\r?\n) # define ends on line
+              [\ \t]*(?<def_value>[^\r\n]*?)
+              [\ \t]*(?<comments>//[^\r\n]*?)?(?:\r?\n) # define ends on line
             )|( #### Decode #DEFINE with value   EXAMPLE:#DEFINE MyDefine bla a,b //test
               (?<=\r?\n) [\ \t]*
               \#DEFINE[\ \t]*
               (?<def_name>[a-zA-Z_][a-zA-Z0-9_]+)
                [\ \t]*(?<comments>//.*?)?(?:\r?\n)  # define ends on line
             )|( #### Decode c/c++ Preprocessor directives   EXAMPLE:#ifndef __MY_INCLUDED__
-              (?<=\r?\n)[\ \t]*(?<def_other>\#(if\s+!?defined|IFDEF|IFNDEF|IF|ELSE|ELIF\s|ENDIF|UNDEF|ERROR|
-               LINE|PRAGMA\s+REGION|PRAGMA\s+ENDREGION))(?<def_stuff>.*?)(?:\r?\n)
+              (?<=\r?\n)[\ \t]*(?<def_other>\#(if[\ \t\r\n]+!?defined|IFDEF|IFNDEF|IF|ELSE|ELIF[\ \t\r\n]|ENDIF|UNDEF|ERROR|
+               LINE|PRAGMA[\ \t\r\n]+REGION|PRAGMA[\ \t\r\n]+ENDREGION))(?<def_stuff>.*?)(?:\r?\n)
             )|( #### Decode structs  EXAMPLE: struct Cat {int a; int b;}
-              (?<=\r?\n|;|\}) \s*
-              struct\s+(?<struct_name>[a-zA-Z_][a-zA-Z0-9_]*)
-               \s*\{\s*
+              (?<=\r?\n|;|\}) [\ \t\r\n]*
+              struct[\ \t\r\n]+(?<struct_name>[a-zA-Z_][a-zA-Z0-9_]*)
+               [\ \t\r\n]*\{[\ \t\r\n]*
                 (?<struct_rows>[^\}]*?)
-               \s*\}\s*
-              (?<struct_imp>[a-zA-Z_][a-zA-Z0-9_]*)?\s*;([\ \t]*(?<comments>//.*?)(?:\r?\n))?
+               [\ \t\r\n]*\}[\ \t\r\n]*
+              (?<struct_imp>[a-zA-Z_][a-zA-Z0-9_]*)?[\ \t\r\n]*;([\ \t]*(?<comments>//.*?)(?:\r?\n))?
             )|( #### Match: const constants  EXAMPLE:const int myNum = 5; static char *SDK_NAME = ""fast"";
               (?<=\r?\n|;|\}) " + VarWithAssignment + @"
             )|( ####  Match: Commands EXAMPLE:\\C2CS_Set_Namespace: mynamespace 
@@ -124,31 +124,31 @@ namespace cppHeaderParse
 
         /// <summary>This is a dictionary of all the built-in and user defined types.
         /// The key is the c/c++ format and the value is the c# translation.</summary>
-        public static Dictionary<string, string> typeConversions = new Dictionary<string, string>()
+        public static SortedDictionary<string, string> typeConversions = new SortedDictionary<string, string>()
         {
             { "bool","bool"},
-            { "longlong","long"},
+            { "char","sbyte"},
             { "char*","string"},
-            { "wchar_t","Char"},
-            { "wchar_t*","string"},
-            { "unsignedchar","byte"},
-            { "unsignedshort","ushort"},
-            { "unsignedint","uint"},
-            { "unsignedlong","uint"},
-            { "unsignedlonglong","ulong"},
+            { "double","double"},
+            { "float","float"},
+            { "int","int"},
+            { "long","long"},
+            { "longlong","long"},
+            { "short","short"},
+            { "shortint","short"},
             { "signedchar","sbyte"},
-            { "signedshort","short"},
             { "signedint","int"},
             { "signedlong","uint"},
             { "signedlonglong","long"},
-            { "char","sbyte"},
-            { "short","short"},
-            { "shortint","short"},
-            { "int","int"},
-            { "long","long"},
-            { "float","float"},
-            { "double","double"},
+            { "signedshort","short"},
+            { "unsignedchar","byte"},
+            { "unsignedint","uint"},
+            { "unsignedlong","uint"},
+            { "unsignedlonglong","ulong"},
+            { "unsignedshort","ushort"},
             { "void*","UIntPtr"},
+            { "wchar_t","Char"},
+            { "wchar_t*","string"},
         };
 
        
@@ -180,7 +180,7 @@ namespace cppHeaderParse
             {
                 text = File.ReadAllText(args[0]) + "\r\n";
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 Console.Write("Error: Error reading " + args[0] + ".  Details:" + ex.ToString());
                 Console.WriteLine("usage: cppHeaderParse.exe input_file [output_file]");
@@ -249,9 +249,9 @@ namespace cppHeaderParse
                         ns_area.AppendLine("    public struct " + structName + "\r\n    {");
 
                         string stuff = match.Groups["struct_rows"].ToString() + "\r\n";
-                        MatchCollection temp2 = Regex.Matches(stuff, VarWithAssignment, RegexOptions.Multiline
+                        MatchCollection structRows = Regex.Matches(stuff, VarWithAssignment, RegexOptions.Multiline
                             | RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture);
-                        foreach (Match structRow in temp2)
+                        foreach (Match structRow in structRows)
                             if (!structRow.ToString().Contains("C2CS_SKIP"))
                             {
                                 // Lets convert the Var to c# format, if it fails then don't add the converted value
@@ -287,25 +287,67 @@ namespace cppHeaderParse
                         StringBuilder sb = new StringBuilder();
                         bool useFlags = false;
                         string name = match.Groups["enum_name"].ToString();
-                        string rows = match.Groups["enum_rows"].ToString() + ",";
+                        string rows = match.Groups["enum_rows"].ToString();
                         sb.AppendLine("    public enum " + name);
                         sb.AppendLine("    {");
-                        MatchCollection items = Regex.Matches(rows,
-                            @"\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:\s*=\s*([^\,(?:\r?\n)\{\}\;]*?))?\s*,");
-                        foreach (Match r in items)
+                        MatchCollection enumRows = Regex.Matches(rows, @"
+[\ \t]*(?:
+(?<CR>\r?\n)
+|(?:(?<comment>//[^\r\n]*?)(?<CR>\r?\n)) # comment only
+|(?:
+    (?: # Match memberName with an optional initializer (Ex: blue = 1 )
+        (?<name>[a-zA-Z_]\w*)   # Match memberName
+        (?:[\ \t]|(?<CR>\r?\n))*                     # Any Whitespace
+        (?:=[\ \t\r\n]*(?<init>\w+)[\ \t\r\n]*)? # Get '=' and initializer
+    )
+    (?: # The 2nd half should either be a comment, a CR, or Last Row
+        (,[\ \t]*(?<comment>//[^\r\n]*?)(?<CR>\r?\n)) # Ex: ',//some Notes'
+        | (?<CR>,[\ \t]*\r?\n) # Match newlines endings Ex:',[CR/LF]'
+        | (?:,(?=[\ \t\r\n]*[a-zA-Z_]\w*[\ \t\r\n]*(?:=[\ \t\r\n]*(?:\w+)[\ \t\r\n]*)?(?://[^\r\n]*?|[\ \t\r\n])*(,|$)))
+        | (?: # Match Last line without comma. Can be comments or whitespace.
+            (?:
+                (?:(?<comment>//[^\r\n]*?)) # Any comments or whitespace
+                | [\ \t\r\n]                   # Any Whitespace
+                # |(?<CR>\r?\n)
+            )+
+            $                         # Match End
+            )
+        )
+    )
+)", RegexOptions.IgnorePatternWhitespace);
+                        bool lastCR = true;
+                        for (int i = 0; i < enumRows.Count; i++)
                         {
-                            bool hasValue = r.Groups[2].Success;
-                            useFlags |= hasValue;
-                            sb.AppendLine("        " + r.Groups[1].ToString() +
-                                (hasValue ? " = " + r.Groups[2].ToString() : "") + ",");
-                        }
-                        sb.AppendLine("    };");
+                            // Get the current enum member GroupCollection
+                            var g = enumRows[i].Groups;
 
+                            string memberName = g["name"].Value;
+                            string initializer = g["init"].Value;
+                            string comment = g["comment"].Value;
+                            bool hasCR = g["CR"].Success;
+                            bool hasInit = (initializer.Length > 0);
+
+                            useFlags |= hasInit;
+
+                            if (lastCR)
+                                sb.Append(' ', 8);
+                            sb.Append(memberName);
+                            if (hasInit)
+                                sb.Append(" = " + initializer);
+                            if (i < enumRows.Count - 1 && (memberName.Length > 0))
+                                sb.Append(", ");
+                            sb.Append(comment);
+                            if (hasCR)
+                                sb.Append("\r\n");
+
+                            lastCR = hasCR;
+                         }
+                        
                         // if any c++ style values then enable flags
                         if (useFlags)
                             ns_area.AppendLine("    [Flags]");
 
-                        ns_area.Append(sb + "\r\n");
+                        ns_area.Append(sb + "\r\n    };\r\n\r\n");
 
                         // now add the enum type to the allowed type lists.
                         typeConversions.Add(name, name);
@@ -406,47 +448,46 @@ namespace cppHeaderParse
             float outFloat;
             double outDouble;
             bool outBool;
+            string newLine = "";
 
             //////  Let’s first see if the type is specified by the user  //////
             Match specifiedType = Regex.Match(comments, 
-                @"C2CS_TYPE:\s?((?:(?:(?!\d)\w+(?:\.(?!\d)\w+)*)\.)?(?:(?!\d)\w+))(?:\s.*|$)");
+                @"C2CS_TYPE:[\ \t\r\n]?((?:(?:(?!\d)\w+(?:\.(?!\d)\w+)*)\.)?(?:(?!\d)\w+))(?:[\ \t\r\n].*|$)");
             if (specifiedType.Success)
             {
-                class_area.AppendLine("        public const " + specifiedType.Groups[1].ToString() + " " 
-                    + name + " = " + val + "; " + comments);
+                newLine = specifiedType.Groups[1].ToString() + " " + name + " = " + val;
                 AddVarName(name, ConstDesc.canBeFloat);
             }
             //////  Let’s see if it can be parsed to simple int  //////
             else if (int.TryParse(val, NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, null, 
                 out outInt))
             {
-                class_area.AppendLine("        public const int " + name + " = " + outInt + "; " + comments);
+                newLine = "int " + name + " = " + outInt;
                 AddVarName(name, ConstDesc.canBeFloat | ConstDesc.canBeDouble | ConstDesc.canBeInt32);
             }
             //////  Let’s see if it can be parsed to double  //////
             else if (double.TryParse(val.TrimEnd('d', 'D'), out outDouble))
             {
-                class_area.AppendLine("        public const double " + name + " = " + val + "; " + comments);
+                newLine = "double " + name + " = " + val ;
                 AddVarName(name, ConstDesc.canBeDouble);
             }               
             //////  Let’s see if it can be parsed to float  //////
             else if (float.TryParse(val.TrimEnd('f', 'F'), out outFloat))
             {
-                class_area.AppendLine("        public const float " + name + " = " + val + "; " + comments);
+                newLine = "float " + name + " = " + val;
                 AddVarName(name, ConstDesc.canBeFloat | ConstDesc.canBeDouble);
             }
             //////  Let’s see if it can be parsed to simple boolean  //////
             else if (bool.TryParse(val.ToLower(), out outBool))
             {
-                class_area.AppendLine("        public const bool " + name + " = " + val.ToLower() + "; " 
-                    + comments);
+                newLine = "bool " + name + " = " + val.ToLower();
                 AddVarName(name, ConstDesc.canBeBool);
             }
             //////  Let’s see if it can be parsed to simple int  //////
-            else if (val.StartsWith("0x")  && Int32.TryParse(val.Substring(2), NumberStyles.AllowHexSpecifier,
+            else if (val.StartsWith("0x")  && int.TryParse(val.Substring(2), NumberStyles.AllowHexSpecifier,
                 null, out outInt))
             {
-                class_area.AppendLine("        public const int " + name + " = " + val + "; " + comments);
+                newLine = "int " + name + " = " + val ;
                 AddVarName(name, ConstDesc.canBeFloat | ConstDesc.canBeInt32);
             }            
             //////  Okay, no luck so far, let’s see if it might be a simple int or float expressions //////
@@ -501,7 +542,7 @@ $", RegexOptions.IgnorePatternWhitespace);
                     foreach (Capture item in items[0].Groups["id"].Captures)
                     {
                         ConstDesc thisConstDesc;
-                        if (Int32.TryParse(item.Value, out outInt)) //todo: allow hex
+                        if (int.TryParse(item.Value, out outInt)) //todo: allow hex
                             allConst &= ConstDesc.canBeFloat | ConstDesc.canBeDouble | ConstDesc.canBeInt32;
                         else if (double.TryParse(item.Value.TrimEnd('d'), out outDouble))
                             allConst &= ConstDesc.canBeDouble;
@@ -519,25 +560,25 @@ $", RegexOptions.IgnorePatternWhitespace);
                     // we should have some types that are supported, let’s wee if int is first
                     if (allConst.HasFlag(ConstDesc.canBeInt32))
                     {
-                        class_area.AppendLine("        public const int " + name + " = " + val + "; " + comments);
+                        newLine = "int " + name + " = " + val;
                         AddVarName(name, ConstDesc.canBeInt32);
                     }
                     // if we cannot use int then let’s try float
                     else if (allConst.HasFlag(ConstDesc.canBeFloat))
                     {
-                        class_area.AppendLine("        public const float " + name + " = " + val + "; " + comments);
+                        newLine = "float " + name + " = " + val;
                         AddVarName(name, ConstDesc.canBeFloat);
                     }
                     // if we cannot use int then let’s try float
                     else if (allConst.HasFlag(ConstDesc.canBeDouble))
                     {
-                        class_area.AppendLine("        public const double " + name + " = " + val + "; " + comments);
+                        newLine = "double " + name + " = " + val;
                         AddVarName(name, ConstDesc.canBeFloat);
                     }
                     // int or float did not work, let’s just default to a string
                     else
                     {
-                        class_area.AppendLine("        public const string " + name + " = \"" + val + "\"; " + comments);
+                        newLine = "string " + name + " = \"" + val + "\"";
                         AddVarName(name, ConstDesc.none);
                     }
                 }
@@ -563,13 +604,13 @@ $", RegexOptions.IgnorePatternWhitespace);
                     // let’s see if the int type was supported
                     if (allConst.HasFlag(ConstDesc.canBeBool))
                     {
-                        class_area.AppendLine("        public const bool " + name + " = " + val + "; " + comments);
+                        newLine = "bool " + name + " = " + val ;
                         consts.Add(name, ConstDesc.canBeBool);
                     }
                     // if not, then let’s just default to a string
                     else
                     {
-                        class_area.AppendLine("        public const string " + name + " = \"" + val + "\"; " + comments);
+                        newLine = "string " + name + " = \"" + val + "\"";
                         consts.Add(name, ConstDesc.none);
                     }
                 }
@@ -577,10 +618,12 @@ $", RegexOptions.IgnorePatternWhitespace);
                 //the RegEx's could not match to an simple into or boolean expression, let’s default to string.
                 if (!isBoolExpression && !isIntExpression)
                 {
-                    class_area.AppendLine("        public const string " + name + " = \"" + val + "\"; " + comments);
+                    newLine = "string " + name + " = \"" + val + "\"";
                     consts.Add(name, ConstDesc.none);
                 }
             }
+            class_area.Append("        public const " + newLine);
+            class_area.AppendLine(comments.Length>0? "; " + comments : ";" );
         }
 
         private static void AddVarName(string name, ConstDesc vall)

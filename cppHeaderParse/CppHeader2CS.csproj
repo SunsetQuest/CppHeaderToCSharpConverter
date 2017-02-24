@@ -38,6 +38,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -55,14 +56,10 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SampleOutput.cs" />
+    <None Include="SampleOutput.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -95,7 +92,7 @@
   <PropertyGroup>
     <PreBuildEvent>rem Normally you would use the tool here (this is the actual project for CppHeader2CS so the command line params are entered in the Debug tab.
 rem Un-Remark the next line and and adjust the paths and file names as needed in your project. (not in this project)
-rem C:\temp\CppHeader2CS.exe "$(ProjectDir)SampleInput.h" "$(ProjectDir)myCppSharedItems.cs"</PreBuildEvent>
+rem $(TargetDir)CppHeader2CS.exe "$(ProjectDir)SampleInput.h" "$(ProjectDir)myCppSharedItems.cs"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
