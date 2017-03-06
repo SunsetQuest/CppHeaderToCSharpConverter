@@ -237,6 +237,14 @@ namespace cppHeaderParse
 
                         ns_area.AppendLine(defType + match.Groups["def_stuff"].Value);
                         class_area.AppendLine(defType + match.Groups["def_stuff"].Value);
+
+                        // Add an empty line after #endif or #endregion for clarity.
+                        if (defType.StartsWith("#end"))
+                        {
+                            ns_area.AppendLine();
+                            class_area.AppendLine();
+                        }
+
                         //Console.WriteLine("other predefinitions time: " + timer.ElapsedMilliseconds + "ms");
                     }
                     // Match structs,  Example: struct SomeStruct3 {char a; char b; char c;};
@@ -605,13 +613,13 @@ $", RegexOptions.IgnorePatternWhitespace);
                     if (allConst.HasFlag(ConstDesc.canBeBool))
                     {
                         newLine = "bool " + name + " = " + val ;
-                        consts.Add(name, ConstDesc.canBeBool);
+                        AddVarName(name, ConstDesc.canBeBool);
                     }
                     // if not, then let’s just default to a string
                     else
                     {
                         newLine = "string " + name + " = \"" + val + "\"";
-                        consts.Add(name, ConstDesc.none);
+                        AddVarName(name, ConstDesc.none);
                     }
                 }
 
@@ -619,7 +627,7 @@ $", RegexOptions.IgnorePatternWhitespace);
                 if (!isBoolExpression && !isIntExpression)
                 {
                     newLine = "string " + name + " = \"" + val + "\"";
-                    consts.Add(name, ConstDesc.none);
+                    AddVarName(name, ConstDesc.none);
                 }
             }
             class_area.Append("        public const " + newLine);
@@ -629,7 +637,7 @@ $", RegexOptions.IgnorePatternWhitespace);
         private static void AddVarName(string name, ConstDesc vall)
         {
             if (consts.ContainsKey(name))
-                Console.WriteLine("Error: '" + name + "' already exists.");
+                Console.WriteLine("Warning: '" + name + "' is defined more then once. This can be normal when using preprocessor directives.");
             else
                 consts.Add(name, vall);
         }

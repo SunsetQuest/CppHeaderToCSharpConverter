@@ -13,6 +13,7 @@ namespace mynamespace
 // This comments will appear in the namespace section.
 #if ! __MYTEST_INCLUDED__
 #endif // __MYTEST_INCLUDED__
+
     public struct SomeStruct1
     {
         public ulong test127; 
@@ -44,6 +45,7 @@ namespace mynamespace
     } //all on one line
 
 #endif // TEST && TEST
+
     public enum test1
     {
         test1
@@ -96,12 +98,19 @@ namespace mynamespace
 #if TEST
 #endif // ifdef TEST
 
-// The 'defined' style of pre-defines are supported. Since the logic is the similar, c++ logic will pass through.
+
+// The 'defined' preprocessor keyword is supported. Since the logic is the similar, c++ logic will pass through.
 #if !(TEST1 && TEST2 || TEST3) 
 #endif 
 
+
+#if DEBUG
+#else
+#endif
+
 #region start
 #endregion
+
 
 
     public struct StructWithBitFields
@@ -136,19 +145,31 @@ namespace mynamespace
         public const short myShort= -100;		// short int is re-labeled to Int16
         public const int NUM_CALCS=6; 
 #endif // __MYTEST_INCLUDED__
+
         public static SomeStruct1 someStructInstance1; // <-- this will actually get put into the class area
         public static SomeStruct2 someStructInstance2; //some notes here
 #if (TEST && TEST) //TEST COMMENT
 #else
 #endif // TEST && TEST
+
         public const double LineFeedOnlyTest = -3.2;
         public const string LineFeedOnlyTest2= "fluidsD3D9";
 #if TEST
 #endif // ifdef TEST
+
 #if !(TEST1 && TEST2 || TEST3) 
 #endif 
+
+        // Initialize values based on preprocessor definitions.
+#if DEBUG
+        public const int duplicateVarName = 5 + 5;
+#else
+        public const int duplicateVarName = 7 + 7;
+#endif
+
 #region start
 #endregion
+
         public const bool My_Bool = true; //public const bool My_Bool = true 
         public const bool My_Bool2 = false; //public const bool My_Bool = false
         // Tabs/spaces are okay.  Also beginning and ending parentheses are okay. 

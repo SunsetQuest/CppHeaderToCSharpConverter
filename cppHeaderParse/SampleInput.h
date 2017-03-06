@@ -53,7 +53,7 @@ const int NUM_CALCS=6;
 #endif // __MYTEST_INCLUDED__
 
 // Here are some structs that get converted into the namespace area but if there is a following implementation it gets added to the class area....
-// Multiline struct test
+// Multi-line struct test
   struct SomeStruct1 
   {
     unsigned 
@@ -156,10 +156,18 @@ static char *LineFeedOnlyTest2 = "fluidsD3D9";
 // C2CS_NS_Write
 
 
-// C2CS_NS_Write // The 'defined' style of pre-defines are supported. Since the logic is the similar, c++ logic will pass through.
+// C2CS_NS_Write // The 'defined' preprocessor keyword is supported. Since the logic is the similar, c++ logic will pass through.
 #if !defined(TEST1 && TEST2 || TEST3) 
 #endif 
 // C2CS_NS_Write
+
+
+// C2CS_Class_Write // Initialize values based on preprocessor definitions.
+#ifdef DEBUG
+#define duplicateVarName 5 + 5
+#else
+#define duplicateVarName 7 + 7
+#endif
 
 
 #pragma region start
