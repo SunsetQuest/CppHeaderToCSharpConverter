@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="NonPublish\**" />
+    <EmbeddedResource Remove="NonPublish\**" />
+    <None Remove="NonPublish\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="SampleOutput.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove=".gitattributes" />
+    <None Remove=".gitignore" />
+    <None Remove="CodeProject Site.url" />
+    <None Remove="CppHeader2CS_article.docx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="SampleOutput.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="SampleInput.h">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

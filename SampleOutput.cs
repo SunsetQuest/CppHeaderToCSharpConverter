@@ -10,18 +10,18 @@ using System.Runtime.InteropServices;
 
 namespace mynamespace
 {
-// This comments will appear in the namespace section.
-#if ! __MYTEST_INCLUDED__
+    // This comments will appear in the namespace section.
+#if !__MYTEST_INCLUDED__
 #endif // __MYTEST_INCLUDED__
 
     public struct SomeStruct1
     {
-        public ulong test127; 
+        public ulong test127;
         public long _test_28;
         public float _test_29;
     } // <-- this will actually get put into the class area
 
- [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential)]
     public struct SomeStruct2
     {
         public ulong test123; //this will get converted to a UInt64
@@ -34,7 +34,7 @@ namespace mynamespace
     {
         public int test1;
         public int test2;
-    } 
+    }
 
 #else
     public struct SomeStruct3
@@ -58,24 +58,24 @@ namespace mynamespace
         T_DFG, // note notes note
         T_GdrefRdgergfg, // note notes note
         T_TdfgrgrBdfg, // note notes note
-        
+
         // NOTE: notes no not notesnot note not notesn no no note no *not* notesn no not notes notes, note not no notes not notes, notesnote
         T_WOV_BPWJKV, // note not notesno
         T_Lwfs = T_WOV_BPWJKV, // fan data
         T_Msvfwwv, // notes note note notes notes not.
         T_Sllqsi6, // note notes note (note note , note)
         T_Ldfgfe4, // note notes note (note)
-        T_Dropd0, 
+        T_Dropd0,
         T_HID_WQO = T_Dropd0, // note not notesno
-        
+
         T_WPVOE_EKN = 0x11// no not notesn
     };
 
     [Flags]
     public enum EnumTest2
     {
-        test1 = 33, 
-        test2 = 7, 
+        test1 = 33,
+        test2 = 7,
         test3 = test2
     };
 
@@ -91,25 +91,25 @@ namespace mynamespace
     };
 
 
-// empty lines below created by using an empty "// C2CS_NS_Write" or // C2CS_NS_Write (blank line)
+    // empty lines below created by using an empty "// C2CS_NS_Write" or // C2CS_NS_Write (blank line)
 
 
-// the #ifdef is converted to #if
+    // the #ifdef is converted to #if
 #if TEST
 #endif // ifdef TEST
 
 
-// The 'defined' preprocessor keyword is supported. Since the logic is the similar, c++ logic will pass through.
-#if !(TEST1 && TEST2 || TEST3) 
-#endif 
+    // The 'defined' preprocessor keyword is supported. Since the logic is the similar, c++ logic will pass through.
+#if !(TEST1 && TEST2 || TEST3)
+#endif
 
 
 #if DEBUG
 #else
 #endif
 
-#region start
-#endregion
+    #region start
+    #endregion
 
 
 
@@ -121,9 +121,9 @@ namespace mynamespace
 
     public struct UserTypeTest1
     {
-        public SomeStruct2 myUserStruct; 
+        public SomeStruct2 myUserStruct;
         public EnumTest2 myUserDefEnum;
-    } 
+    }
 
     public struct SHOULD_BE_SKIPPED570
     {
@@ -131,19 +131,19 @@ namespace mynamespace
 
     public struct UserTypeTest2
     {
-        public UserTypeTest1 myUserStruct1; 
+        public UserTypeTest1 myUserStruct1;
         public UserTypeTest1 myUserDefEnum2;
-    } 
+    }
 
     class myClass
     {
         // This comment will appear in the class section.
 #if ! __MYTEST_INCLUDED__
-        public const string SDK_name= "fluidsD3D92";	// re-labeled into a string
-        public const string SDK_name2= "fluidsD3D9";	// re-labeled into a string
-        public const sbyte myChar= -100;				// char is re-labeled to sbyte
-        public const short myShort= -100;		// short int is re-labeled to Int16
-        public const int NUM_CALCS=6; 
+        public const string SDK_name = "fluidsD3D92";	// re-labeled into a string
+        public const string SDK_name2 = "fluidsD3D9";	// re-labeled into a string
+        public const sbyte myChar = -100;				// char is re-labeled to sbyte
+        public const short myShort = -100;		// short int is re-labeled to Int16
+        public const int NUM_CALCS = 6;
 #endif // __MYTEST_INCLUDED__
 
         public static SomeStruct1 someStructInstance1; // <-- this will actually get put into the class area
@@ -153,7 +153,7 @@ namespace mynamespace
 #endif // TEST && TEST
 
         public const double LineFeedOnlyTest = -3.2;
-        public const string LineFeedOnlyTest2= "fluidsD3D9";
+        public const string LineFeedOnlyTest2 = "fluidsD3D9";
 #if TEST
 #endif // ifdef TEST
 
@@ -167,8 +167,8 @@ namespace mynamespace
         public const int duplicateVarName = 7 + 7;
 #endif
 
-#region start
-#endregion
+        #region start
+        #endregion
 
         public const bool My_Bool = true; //public const bool My_Bool = true 
         public const bool My_Bool2 = false; //public const bool My_Bool = false
@@ -201,6 +201,6 @@ namespace mynamespace
         public const bool exprBool_Mixed1 = (my_float1 == my_float1) || true; // C2CS_TYPE:bool
         // Any #Defines that cannot be converted into an int, float, or bool will be a string 
         public const string my_string = "MyString";
-        
+
     }
 }
