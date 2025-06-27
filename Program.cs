@@ -1,15 +1,14 @@
-﻿/* CppHeader2CS was created by Ryan White  (Updated: 2/23/2017)
+﻿/* CppHeader2CS was created by Ryan S White  (Updated: 6/27/2025, Created: 2014)
    
    Purpose: A tool to share simple constants, structs, and a few other items between a C/C++ and a C#
    project at compile time.  Despite it's name its not a full C to C# converter.  It is mostly a tool 
    to use for converting simple items found in a c header file to a c# file.
    
-   License: Code Project Open License (CPOL) 1.02 - Feel free to use however you wish in any 
-   commercial or open source projects. The author is not responsible for any damages caused by this 
-   software. Use it at your own risk. Please feel free to contribute by emailing fixes 
-   or additions to s u n s e t q u e s t AT h o t m a i l . c o m.
+   License: MIT - Feel free to use however you wish. The author is not responsible for any damages 
+   caused by this code. Use it at your own risk. Please feel free to contribute.
   
-   Project link:  http://www.codeproject.com/Articles/800111/Passing-C-Cplusplus-Constants-e
+   Project link:  https://github.com/SunsetQuest/CppHeaderToCSharpConverter/
+   Past publication: http://www.codeproject.com/Articles/800111/Passing-C-Cplusplus-Constants-e
    
    Visual studio usage: 
     1) Copy the CppHeader2CS.exe file to some location on your local drive.
@@ -25,7 +24,7 @@ using System.Text.RegularExpressions;
 
 namespace CppHeader2CS;
 
-class Program
+partial class Program
 {
     /// <summary> ConstDesc flags all the types a #define might be.</summary>
     [Flags]
@@ -116,7 +115,7 @@ class Program
     /// This Dictionary holds a list of all the constant vars outputted along with the possible 
     /// types it can be.
     /// </summary>
-    public static Dictionary<string, ConstDesc> consts = [];
+    public static Dictionary<string, ConstDesc> constants = [];
 
     /// <summary>This is a dictionary of all the built-in and user defined types.
     /// The key is the c/c++ format and the value is the c# translation.</summary>
@@ -149,9 +148,15 @@ class Program
 
     private static void Main(string[] args)
     {
-        // This is for timing - it can be commented out if desired
         System.Diagnostics.Stopwatch timer = new();
         timer.Start();
+
+        // Uncomment the following line to test with a specific file instead of using command line arguments
+        args =
+        [
+            "SampleInput.h", // Input file path
+            "SampleOutput.cs" // Output file path (optional)
+        ];
 
         // Display some simple help message if no options are given or "\?" or "-?"
         if (args.Length == 0)
@@ -196,9 +201,7 @@ class Program
         // Process the input file
         try
         {
-            MatchCollection matches = Regex.Matches(text, mainParser, RegexOptions.Multiline |
-                            RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace |
-                            RegexOptions.ExplicitCapture);
+            MatchCollection matches = MainParserRegex().Matches(text);
 
             foreach (Match match in matches)
             {
@@ -469,7 +472,7 @@ class Program
         string type = RemoveWhitespace(match.Groups["type"].ToString()); // Removes whitespace
         string name = match.Groups["name"].ToString();
         string post = match.Groups["post"].ToString();
-        bool found = typeConversions.TryGetValue(type, out string csVersion);
+        bool found = typeConversions.TryGetValue(type, out var csVersion);
         return found ? csVersion + " " + name + post : null;
     }
 
@@ -597,7 +600,7 @@ class Program
                     {
                         allConst &= ConstDesc.canBeFloat | ConstDesc.canBeDouble;
                     }
-                    else if (consts.TryGetValue(item.Value, out ConstDesc thisConstDesc))
+                    else if (constants.TryGetValue(item.Value, out ConstDesc thisConstDesc))
                     {
                         allConst &= thisConstDesc;
                     }
@@ -638,7 +641,7 @@ class Program
                     {
                         allConst &= ConstDesc.canBeBool;
                     }
-                    else if (consts.TryGetValue(item.Value, out ConstDesc thisConstDesc))
+                    else if (constants.TryGetValue(item.Value, out ConstDesc thisConstDesc))
                     {
                         allConst &= thisConstDesc;
                     }
@@ -672,13 +675,9 @@ class Program
 
     private static void AddVarName(string name, ConstDesc vall)
     {
-        if (consts.ContainsKey(name))
+        if (!constants.TryAdd(name, vall))
         {
             Console.WriteLine($"Warning: '{name}' is defined more than once. This can be normal when using preprocessor directives.");
-        }
-        else
-        {
-            consts.Add(name, vall);
         }
     }
 
@@ -735,7 +734,6 @@ class Program
     /// </summary>
     public static string RemoveWhitespace(string str)
     {
-        var len = str.Length;
         var src = str.ToCharArray();
         int dstIdx = 0;
         for (int i = 0; i < str.Length; i++)
@@ -748,4 +746,7 @@ class Program
         }
         return new string(src, 0, dstIdx);
     }
+
+    [GeneratedRegex(mainParser, RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace, "en-US")]
+    private static partial Regex MainParserRegex();
 }
