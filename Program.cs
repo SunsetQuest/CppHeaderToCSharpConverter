@@ -152,11 +152,11 @@ partial class Program
         timer.Start();
 
         // Uncomment the following line to test with a specific file instead of using command line arguments
-        args =
-        [
-            "SampleInput.h", // Input file path
-            "SampleOutput.cs" // Output file path (optional)
-        ];
+        //args =
+        //[
+        //    "SampleInput.h", // Input file path
+        //    "SampleOutput.cs" // Output file path (optional)
+        //];
 
         // Display some simple help message if no options are given or "\?" or "-?"
         if (args.Length == 0)
@@ -190,7 +190,7 @@ partial class Program
         }
 
         // Remove all /*...*/ style comments
-        text = Regex.Replace(text, @"/\*[^*]*\*+(?:[^*/][^*]*\*+)*/", string.Empty);
+        text = RemoveAllAreaStyleCommentsRegex().Replace(text, string.Empty);
 
         // Create the three output containers, which will be merged at the end
         StringBuilder top_area = new("// Generated using CppHeader2CS\r\n");
@@ -270,8 +270,7 @@ partial class Program
                     _ = ns_area.AppendLine("    public struct " + structName + "\r\n    {");
 
                     string stuff = match.Groups["struct_rows"].ToString() + "\r\n";
-                    MatchCollection structRows = Regex.Matches(stuff, VarWithAssignment, RegexOptions.Multiline
-                        | RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture);
+                    MatchCollection structRows = StructRowsRegex().Matches(stuff);
                     foreach (Match structRow in structRows)
                     {
                         if (!structRow.ToString().Contains("C2CS_SKIP"))
@@ -315,31 +314,7 @@ partial class Program
                     string rows = match.Groups["enum_rows"].ToString();
                     _ = sb.AppendLine("    public enum " + name);
                     _ = sb.AppendLine("    {");
-                    MatchCollection enumRows = Regex.Matches(rows, @"
-[\ \t]*(?:
-(?<CR>\r?\n)
-|(?:(?<comment>//[^\r\n]*?)(?<CR>\r?\n)) # comment only
-|(?:
-    (?: # Match memberName with an optional initializer (Ex: blue = 1 )
-        (?<name>[a-zA-Z_]\w*)   # Match memberName
-        (?:[\ \t]|(?<CR>\r?\n))*                     # Any Whitespace
-        (?:=[\ \t\r\n]*(?<init>[\w\+\-\*/]+)[\ \t\r\n]*)? # Get '=' and initializer
-    )
-    (?: # The 2nd half should either be a comment, a CR, or Last Row
-        (,[\ \t]*(?<comment>//[^\r\n]*?)(?<CR>\r?\n)) # Ex: ',//some Notes'
-        | (?<CR>,[\ \t]*\r?\n) # Match newlines endings Ex:',[CR/LF]'
-        | (?:,(?=[\ \t\r\n]*[a-zA-Z_]\w*[\ \t\r\n]*(?:=[\ \t\r\n]*(?:[\w\+\-\*/]+)[\ \t\r\n]*)?(?://[^\r\n]*?|[\ \t\r\n])*(,|$)))
-        | (?: # Match Last line without comma. Can be comments or whitespace.
-            (?:
-                (?:(?<comment>//[^\r\n]*?)) # Any comments or whitespace
-                | [\ \t\r\n]                   # Any Whitespace
-                # |(?<CR>\r?\n)
-            )+
-            $                         # Match End
-            )
-        )
-    )
-)", RegexOptions.IgnorePatternWhitespace);
+                    MatchCollection enumRows = enumRowsRegex().Matches(rows);
                     bool lastCR = true;
                     for (int i = 0; i < enumRows.Count; i++)
                     {
@@ -493,8 +468,7 @@ partial class Program
         string comments = match.Groups["comments"].Value;
 
         // Check if the type is specified by the user
-        Match specifiedType = Regex.Match(comments,
-            @"C2CS_TYPE:[\ \t\r\n]?((?:(?:(?!\d)\w+(?:\.(?!\d)\w+)*)\.)?(?:(?!\d)\w+))(?:[\ \t\r\n].*|$)");
+        Match specifiedType = commentsRegex().Match(comments);
         string newLine;
         if (specifiedType.Success)
         {
@@ -541,44 +515,14 @@ partial class Program
             bool isBoolExpression = false;
 
             // Check for integer expressions
-            items = Regex.Matches(val, @"
-^(
-    (?:
-        -?[\s\(]* # allow '-' and '('
-        (?<id>
-            [a-zA-Z_][a-zA-Z0-9_]*  # match var name
-            |\d+(?:\.\d*)? (?:d|D|f|F|u|l|ll|LL)?  # match number
-            |0[xX][0-9a-fA-F]+b?
-        )
-        [\s\)]* # allow space and ')'
-        [\+\-\*\/] # operation
-        [\s\(]* # allow space and '('
-    )*
-    -?[\s\(]* # allow '-' and '('
-    (?<id>
-        [a-zA-Z_][a-zA-Z0-9_]*  # match var name
-        |\d+(?:\.\d*)? (?:d|D|f|F|u|l|ll|LL)?  # match number
-        |0[xX][0-9a-fA-F]+b?
-    )
-    [\s\)]* # allow space and ')'
-)$", RegexOptions.IgnorePatternWhitespace);
+            items = checkForIntegerExpressionsRegex().Matches(val);
 
             bool isIntExpression = items.Count > 0;
 
             // Check for boolean expressions
             if (!isIntExpression)
             {
-                items = Regex.Matches(val, @"
-^(
-    (?:
-        [\s\(]*
-        !*(true|false|(?<id>(?!\d)\w+))
-        [\s\(\)]*
-        (&&|\|\|)[\s\(\)]*
-    )*
-    !*(true|false|(?<id>(?!\d)\w+))
-    [\s\)]*
-)$", RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture);
+                items = CheckForBooleanExpressionsRegex().Matches(val);
 
                 isBoolExpression = items.Count > 0;
             }
@@ -749,4 +693,76 @@ partial class Program
 
     [GeneratedRegex(mainParser, RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace, "en-US")]
     private static partial Regex MainParserRegex();
+
+    // Remove all /*...*/ style comments
+    [GeneratedRegex(@"/\*[^*]*\*+(?:[^*/][^*]*\*+)*/")]
+    private static partial Regex RemoveAllAreaStyleCommentsRegex();
+
+    [GeneratedRegex(VarWithAssignment, RegexOptions.Multiline | RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace)]
+    private static partial Regex StructRowsRegex();
+
+    [GeneratedRegex(@"
+[\ \t]*(?:
+(?<CR>\r?\n)
+|(?:(?<comment>//[^\r\n]*?)(?<CR>\r?\n)) # comment only
+|(?:
+    (?: # Match memberName with an optional initializer (Ex: blue = 1 )
+        (?<name>[a-zA-Z_]\w*)   # Match memberName
+        (?:[\ \t]|(?<CR>\r?\n))*                     # Any Whitespace
+        (?:=[\ \t\r\n]*(?<init>[\w\+\-\*/]+)[\ \t\r\n]*)? # Get '=' and initializer
+    )
+    (?: # The 2nd half should either be a comment, a CR, or Last Row
+        (,[\ \t]*(?<comment>//[^\r\n]*?)(?<CR>\r?\n)) # Ex: ',//some Notes'
+        | (?<CR>,[\ \t]*\r?\n) # Match newlines endings Ex:',[CR/LF]'
+        | (?:,(?=[\ \t\r\n]*[a-zA-Z_]\w*[\ \t\r\n]*(?:=[\ \t\r\n]*(?:[\w\+\-\*/]+)[\ \t\r\n]*)?(?://[^\r\n]*?|[\ \t\r\n])*(,|$)))
+        | (?: # Match Last line without comma. Can be comments or whitespace.
+            (?:
+                (?:(?<comment>//[^\r\n]*?)) # Any comments or whitespace
+                | [\ \t\r\n]                   # Any Whitespace
+                # |(?<CR>\r?\n)
+            )+
+            $                         # Match End
+            )
+        )
+    )
+)", RegexOptions.IgnorePatternWhitespace)]
+    private static partial Regex enumRowsRegex();
+
+
+    [GeneratedRegex(@"C2CS_TYPE:[\ \t\r\n]?((?:(?:(?!\d)\w+(?:\.(?!\d)\w+)*)\.)?(?:(?!\d)\w+))(?:[\ \t\r\n].*|$)")]
+    private static partial Regex commentsRegex();
+    [GeneratedRegex(@"
+^(
+    (?:
+        -?[\s\(]* # allow '-' and '\('
+        (?<id>
+            [a-zA-Z_][a-zA-Z0-9_]*  # match var name
+            |\d+(?:\.\d*)? (?:d|D|f|F|u|l|ll|LL)?  # match number
+            |0[xX][0-9a-fA-F]+b?
+        )
+        [\s\)]* # allow space and '\)'
+        [\+\-\*\/] # operation
+        [\s\(]* # allow space and '\('
+    )*
+    -?[\s\(]* # allow '-' and '('
+    (?<id>
+        [a-zA-Z_][a-zA-Z0-9_]*  # match var name
+        |\d+(?:\.\d*)? (?:d|D|f|F|u|l|ll|LL)?  # match number
+        |0[xX][0-9a-fA-F]+b?
+    )
+    [\s\)]* # allow space and ')'
+)$", RegexOptions.IgnorePatternWhitespace)]
+    private static partial Regex checkForIntegerExpressionsRegex();
+    [GeneratedRegex(@"
+^(
+    (?:
+        [\s\(]*
+        !*(true|false|(?<id>(?!\d)\w+))
+        [\s\(\)]*
+        (&&|\|\|)[\s\(\)]*
+    )*
+    !*(true|false|(?<id>(?!\d)\w+))
+    [\s\)]*
+)$", RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace)]
+    private static partial Regex CheckForBooleanExpressionsRegex();
 }
